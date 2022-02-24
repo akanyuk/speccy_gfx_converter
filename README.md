@@ -24,5 +24,5 @@ https://nyuk.retropc.ru/gfx_converter
 
 ## Готовая сборка (Windows) 
 
-Готовая сборка конвертера с веб-сервером nginx для Windows доступна по этой ссылке: https://disk.yandex.ru/d/a72cbKqY1Deoxw
+Готовая сборка конвертера с веб-сервером nginx для Windows доступна по этой ссылке: https://disk.yandex.ru/d/9cobtJk04e61bw
 
