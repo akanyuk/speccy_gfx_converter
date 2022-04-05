@@ -1,7 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 
-require('ZXGFX.php');
+require('src/ZXGFX.php');
 
 $ZXGFX = new ZXGFX();
 
