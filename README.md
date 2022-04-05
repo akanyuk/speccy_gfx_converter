@@ -1,6 +1,6 @@
 ﻿# Speccy GFX converter
 
-Конвертер изображений ZX Spectrum в формат PNG или GIF.
+Конвертер изображений ZX Spectrum в формат PNG или GIF
 
 ## Поддерживаемые форматы:
 * Обычный экран (6912 байт)
@@ -12,7 +12,7 @@
 
 ## Установка и запуск 
 
-Для запуска необходим web-сервер с поддержкой PHP не ниже v5.4
+Для запуска необходим web-сервер с поддержкой PHP не ниже v5.4, а так же [Composer](https://getcomposer.org/)
 
 * Скопировать файлы проекта на web-сервер
 * Выполнить `composer update`
@@ -23,7 +23,9 @@
 https://nyuk.retropc.ru/gfx_converter
 
 
-## Готовая сборка (Windows) 
+## Готовый сервер (Windows)
 
-Готовая сборка конвертера с веб-сервером nginx для Windows доступна по этой ссылке: https://disk.yandex.ru/d/9cobtJk04e61bw
+Готовый сервер nginx + php7 для Windows доступен по этой ссылке: https://disk.yandex.ru/d/nWg7CATT5Vsegg. Скачанный архив необходимо распаковать в каталог проекта.
 
+* Запустить `win-server-start.cmd`
+* Открыть в браузере `http://localhost:48128` если не открылся автоматически
