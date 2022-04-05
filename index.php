@@ -1,11 +1,9 @@
 <?php
+require 'vendor/autoload.php';
 
-require('../ZXGFX.php');
+require('ZXGFX.php');
 
-// Инициализация класса.
-if (!$ZXGFX = new ZXGFX()) {
-	exit('Unable to create ZXGFX instance');
-}
+$ZXGFX = new ZXGFX();
 
 if (!empty($_FILES)) {
 	// Установка опций. Корректность значений проверяется при установке.
@@ -51,8 +49,6 @@ if (!empty($_FILES)) {
 			// Параметром вызова функции можно указать имя скачиваемого файла без расширения
 			$ZXGFX->download(pathinfo($_FILES['src_file']['name'], PATHINFO_FILENAME));
 		}
-
-		echo $data;
 /*
 	Так же можно сохранить сконвертированный файл.
 	$path - полный путь к сохраняемому файлу.
@@ -80,7 +76,6 @@ if (!empty($_FILES)) {
 		$zip = new ZipArchive;
 		if (!$zip->open($tempFile)) {
 			exit('Unable to open ZIP archive');
-			return false;
 		}
 
 		$frames = array();
@@ -114,14 +109,19 @@ if (!empty($_FILES)) {
 
 		$delays[count($delays) - 1] = $final_delay;
 
-		// GIFEncoder errors suppressing
+        // GIFEncoder errors suppressing
 		error_reporting(0);
-		require('vendor/GIFEncoder.class.php');
-		$GIF = new AnimatedGif($frames, $delays, 0, 2, -1, -1, -1, "bin");
 
-		header('Content-type: image/gif');
+        $gc = new GifCreator\GifCreator();
+        try {
+            $gc->create($frames, $delays);
+        } catch (Exception $e) {
+            exit($e->getMessage());
+        }
+
+        header('Content-type: image/gif');
 		header('Content-Disposition: filename="'.pathinfo($_FILES['src_file']['name'], PATHINFO_FILENAME).'.gif"');
-		echo  $GIF->GetAnimation();
+		echo  $gc->getGif();
 	} else {
 		exit("Bad request");
 	}
@@ -135,7 +135,7 @@ if (!empty($_FILES)) {
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="language" content="ru" />
 <title>GFX converter</title>
-<style>
+<style type="text/css">
 	BODY { background: #ffffff; margin: 0; padding: 1em 2em; color: #222; }
 	BODY, P { font: 15px Verdana, Geneva, sans-serif; }
 	HR { margin: 5px 0 10px 0; padding: 0; border: none; border-bottom: 1px solid #bbbbbb;}
@@ -145,31 +145,39 @@ if (!empty($_FILES)) {
 	FORM fieldset legend { font-weight: bold; color: #005dab; *margin-bottom: 10px; }
 	FORM input { padding: 2px 5px 4px 5px; }
 	FORM label { display: block; float: left; width: 250px; padding: 3px 5px 3px 0; margin: 0; text-align: right; }
-	FORM .hint { margin-left: 260px; margin-bottom: 10xp; font-size: 13px; color: #444; }
+    FORM label.inline { display: inline; float: initial; }
+	FORM .hint { margin-left: 260px; margin-bottom: 10px; font-size: 13px; color: #444; }
 	FORM .delimiter { clear: both; padding-bottom: 1em; }
 </style>
 </head><body>
 	
-<form method="POST" enctype="multipart/form-data" target="_blank">
+<form method="POST" enctype="multipart/form-data" target="_blank" action="">
 	<fieldset>
 		<legend>Speccy GFX converter</legend>
 		
 		<label for="file">Select file</label>
-		<input type="file" name="src_file" />
+		<input type="file" name="src_file" id="file"/>
 		<div class="hint">Select ZX screen file or ZIP archive with multiple ZX files</div>
 		<div class="delimiter"></div>
 		
 		<hr /> 
 
-		<label for="output_scale">Output scale</label>
-		<input type="radio" name="output_scale" value="1"/> 1x
-		<input type="radio" checked name="output_scale" value="2"/> 2x
-		<input type="radio" name="output_scale" value="3"/> 3x
-		<input type="radio" name="output_scale" value="0.5"/> 0.5x
+		<label for="output-scale-2">Output scale</label>
+		<input type="radio" id="output-scale-1" name="output_scale" value="1"/>
+        <label class="inline" for="output-scale-1">1x</label>
+
+		<input type="radio" id="output-scale-2" checked name="output_scale" value="2"/>
+        <label class="inline" for="output-scale-2">2x</label>
+
+		<input type="radio" id="output-scale-3" name="output_scale" value="3"/>
+        <label class="inline" for="output-scale-3">3x</label>
+
+		<input type="radio" id="output-scale-05" name="output_scale" value="0.5"/>
+        <label class="inline" for="output-scale-05">0.5x</label>
 		<div class="delimiter"></div>
 		
 		<label for="palette">Palette</label>
-		<select name="palette">
+		<select name="palette" id="palette">
 <?php
 	foreach ($ZXGFX->getPalettes() as $name=>$foo) {
 		echo '<option value="'.$name.'">'.$name.'</option>';
@@ -179,15 +187,15 @@ if (!empty($_FILES)) {
 		<div class="delimiter"></div>
 			
 		<label for="border">Border</label>
-		<select name="border">
+		<select name="border" id="border">
 <?php
 	foreach ($ZXGFX->getBorders() as $name=>$foo) {
 		$selected = ($name == 'small') ? ' SELECTED' : '';
-		echo '<option value="'.$name.'"'.$selected.'>'.$name.'</option>';
+		echo "<option value=\"$name\" $selected>$name</option>";
 	}
 ?>
 		</select>
-		<select name="border_color">
+		<select name="border_color" id="border_color">
 			<option value="0" style="background-color: #000000;">black</option>
 			<option value="1" style="background-color: #0000cc;">blue</option>
 			<option value="2" style="background-color: #cc0000;">red</option>
@@ -197,11 +205,13 @@ if (!empty($_FILES)) {
 			<option value="6" style="background-color: #cccc00;">yellow</option>
 			<option value="7" style="background-color: #cccccc;">white</option>
 		</select>
+        <label for="border_color" style="display: none;"></label>
 		<div class="delimiter"></div>
-		
-		<label for="show_hidden_pixels"></label>
-		<input type="checkbox" name="show_hidden_pixels"/> Show hidden pixels (INK=PAPER) 
-		<select name="hidden_color">
+
+        <label>&nbsp;</label>
+		<input type="checkbox" name="show_hidden_pixels" id="show_hidden_pixels"/>
+        <label for="show_hidden_pixels" style="display: inline;float: none;">Show hidden pixels (INK=PAPER)</label>
+		<select name="hidden_color" id="hidden_color">
 			<option value="0">transparent</option>
 <?php
 		foreach ($ZXGFX->getHiddenColors() as $index=>$color) {
@@ -209,11 +219,12 @@ if (!empty($_FILES)) {
 			echo '<option value="'.$index.'" style="font-family: monospace; background-color: #'.$str_color.';">#'.$str_color.'</option>';
 		}
 ?>
-		</select>	
+		</select>
+        <label for="hidden_color" style="display: none;"></label>
 		<div class="delimiter"></div>
 
 		<label for="filter_interleave">Interleave</label>
-		<select name="filter_interleave">
+		<select name="filter_interleave" id="filter_interleave">
 			<option value="-1">disable</option>
 			<option value="0">black</option>
 			<option value="25">25% transparent</option>
@@ -223,7 +234,7 @@ if (!empty($_FILES)) {
 		<div class="delimiter"></div>
 		
 		<label for="filter_blur">Blur</label>
-		<select name="filter_blur">
+		<select name="filter_blur" id="filter_blur">
 			<option value="-1">disable</option>
 			<option value="light-blur">Light Blur</option>
 			<option value="gaussian-blur">Gaussian Blur</option>
@@ -232,9 +243,12 @@ if (!empty($_FILES)) {
 
 		<h2>Conversion of one ZX Spectrum file</h2>
 		
-		<label for="output_type">Output type</label>
-		<input type="radio" checked name="output_type" value="png"/> PNG
-		<input type="radio" name="output_type" value="gif"/> GIF
+		<label for="output_type-png">Output type</label>
+		<input type="radio" id="output_type-png" checked name="output_type" value="png"/>
+        <label class="inline" for="output_type-png">PNG</label>
+
+		<input type="radio" id="output_type-gif" name="output_type" value="gif"/>
+        <label class="inline" for="output_type-gif">GIF</label>
 		<div class="delimiter"></div>
 		
 		<label>&nbsp;</label>
@@ -245,11 +259,11 @@ if (!empty($_FILES)) {
 		<h2>Make GIF animation of uploaded in ZIP archive files</h2>
 
 		<label for="frame_delay">Frame delay, msec</label>
-		<input type="text" name="frame_delay" value="2000" />
+		<input type="text" id="frame_delay" name="frame_delay" value="2000" />
 		<div class="delimiter"></div>
 				
 		<label for="final_delay">Final delay, msec</label>
-		<input type="text" name="final_delay" value="10000" />
+		<input type="text" id="final_delay" name="final_delay" value="10000" />
 		<div class="delimiter"></div>
 			
 		<label>&nbsp;</label>
@@ -257,6 +271,6 @@ if (!empty($_FILES)) {
 	</fieldset>
 </form>
 
-<p>&copy; 2008-2022, Andrey <a href="http://nyuk.retropc.ru">nyuk</a> Marinow</p>
+<p>&copy; 2008-2022, Andrey <a href="http://nyuk.retropc.ru">nyuk</a> Marinov</p>
 
 </body></html>
