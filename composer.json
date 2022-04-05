@@ -1,0 +1,24 @@
+{
+    "name": "akanyuk/speccy_gfx_converter",
+    "type": "library",
+    "description": "Convert various formats of ZX Spectrum graphics into PNG or GIF file",
+    "keywords": ["convertor"],
+    "homepage": "https://github.com/akanyuk/speccy_gfx_converter",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Andrey Marinov",
+            "email": "aka.nyuk@gmail.com",
+            "homepage": "http://nyuk.retropc.ru",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "ZXGFX": ""
+        }
+    }
+}
