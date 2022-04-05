@@ -15,7 +15,8 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "sybio/gif-creator": "^1.0"
+        "sybio/gif-creator": "^1.0",
+        "ext-zip": "*"
     },
     "autoload": {
         "psr-0": {
