@@ -20,7 +20,7 @@
 
 ## Online demo
 
-https://nyuk.retropc.ru/gfx_converter
+https://nyuk.retroscene.org/gfx_converter
 
 
 ## Готовый сервер (Windows)
