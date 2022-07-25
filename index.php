@@ -109,7 +109,7 @@ if (!empty($_FILES)) {
 
 		$delays[count($delays) - 1] = $final_delay;
 
-        // GIFEncoder errors suppressing
+        // GifCreator errors suppressing
 		error_reporting(0);
 
         $gc = new GifCreator\GifCreator();
